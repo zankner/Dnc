@@ -9,7 +9,5 @@ def memory_retention_vector(forget_gate_list, read_weighting_prev, read_head_cou
         output_list.append(output_element)
 
     output_vector = np.array(output_list)
-    output_vector = np.prod(output_vector)
+    output_vector = np.prod(output_vector, axis = 0) #output vector should be 1 x N. One row and N locations(columns).
     return output_vector
-
-    
