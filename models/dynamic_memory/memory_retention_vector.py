@@ -1,4 +1,4 @@
-import tensorflow
+import tensorflow as tf
 import numpy as np
 
 def memory_retention_vector(forget_gate_list, read_weighting_prev, read_head_count):
