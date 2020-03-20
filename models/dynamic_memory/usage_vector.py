@@ -10,4 +10,4 @@ def usage_vector(memory_retention_vector, prev_usage_vector, prev_write_vector):
     return final_vector
     #notes: essentially, the usage vector should always return a size of (n*1),
     #which is why the memory retention vector is always transposed, since its initially
-    #it is of size (1*n).
+    #it is of size (1*n). Final vector should return size of (n*1)
