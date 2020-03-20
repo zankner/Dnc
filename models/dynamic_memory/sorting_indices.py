@@ -18,3 +18,17 @@ def sorting_indices(usage_vector, memory_locations):
 
     #Program plan, first set the usage vector and memory_locations into a hash table. Then,
     #sort the free_list_keys. After the keys are sorted, then compare back with hash table.
+
+    #tf.argsort ===> actually for sorting I should have used arg sort, then I need no hashtable
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
+    #tf.argsort
