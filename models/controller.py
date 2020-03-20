@@ -2,7 +2,7 @@ import tensorflow as tf
 # Import layers:
 from tensorflow.keras.layers import (
     Dense, Flatten, Conv2D, Conv2DTranspose,
-    BatchNormalization, concatenate, MaxPool2D, Flatten, Dot
+    BatchNormalization, MaxPool2D, Flatten, Dot
 )
 from tensorflow.keras import Model
 
@@ -14,7 +14,7 @@ class Network(Model):
 
     #interface dimensionality
     g = 10
-    
+
   def __init__(self):
     super(UNet, self).__init__()
     # Define layers of the network:
