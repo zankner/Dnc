@@ -5,8 +5,14 @@ def update_temporal_links(temporal_links, write_weights, precedence):
   write_weight_j = tf.broadcast_to(
       summed_write_weights, [write_weights.shape[1], 
       write_weights.shape[1]])
-  print(write_weight_j)
   write_weight_i = tf.transpose(write_weight_j)
-  print(write_weight_i)
-
-update_temporal_links(3, tf.random.uniform([10, 5]), 3)
+  temporal_links_weighting = 1 - write_weight_i - write_weight_j
+  weighted_temporal_links = tf.math.multiply(
+      temporal_links, temporal_links_weighting)
+  summed_precedence = tf.math.reduce_sum(precedence, 0)
+  precedence_expanded = tf.transpose(tf.broadcast_to(
+      summed_precedence, [precedence.shape[1], precedence.shape[1]]))
+  weighted_precedence = tf.math.multiply(
+      write_weight_i, precedence_expanded)
+  temporal_links = weighted_temporal_links + weighted_precedence
+  return temporal_links
