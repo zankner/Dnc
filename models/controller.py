@@ -1,12 +1,11 @@
 import tensorflow as tf
-# Import layers:
 from tensorflow.keras.layers import (
     Dense, Flatten, Conv2D, Conv2DTranspose,
     BatchNormalization, MaxPool2D, Flatten, Dot
 )
 from tensorflow.keras import Model
 
-#Defining network Below:
+
 class Network(Model):
 
     #output dimensionality
@@ -17,7 +16,6 @@ class Network(Model):
 
   def __init__(self):
     super(UNet, self).__init__()
-    # Define layers of the network:
     self.flatten = Flatten()
     self.d1 = Dense(100, activation='relu')
     self.weights_output = Dense(n)
@@ -25,9 +23,6 @@ class Network(Model):
     self.weights_xi = Dense(g)
 
   def call(self, input, read_vectors, training=False):
-    # Call layers of network on input x
-    # Use the training variable to handle adding layers such as Dropout
-    # and Batch Norm only during training
 
     #feed forward
     read_vectors = self.flatten(read_vectors)
