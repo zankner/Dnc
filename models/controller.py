@@ -4,6 +4,7 @@ from tensorflow.keras.layers import (
     BatchNormalization, MaxPool2D, Flatten, Dot
 )
 from tensorflow.keras import Model
+from models.temporal_link import temporal_link
 
 
 class Network(Model):
@@ -22,6 +23,7 @@ class Network(Model):
     self.weights_read = Dense(n)
     self.weights_xi = Dense(g)
 
+
   def call(self, input, read_vectors, training=False):
 
     #feed forward
@@ -35,5 +37,13 @@ class Network(Model):
 
     #interface vector
     interface_vector = self.weights_xi(h)
+    r_keys, r_strenghts, w_key, w_strength, \
+        e, w, r_gates, allocation, w_gate, r_models = tf.split(
+            interface_vector, [W*R, R, W, 1, W, W, R, 1, 1, R*3], 1)
+    r_gates = [tf.split(r_gates, [r for r in range(R)])]
+
+    #Accesing memory
+    temporal_links, precedence = temporal_link(temporal_links,
+        precedence, write_weightings)
 
     return output_vector, interface_vector
