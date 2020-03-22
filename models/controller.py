@@ -40,5 +40,8 @@ class Network(Model):
 
     #interface vector
     interface_vector = self.weights_xi(h)
+    r_keys, r_strenghts, w_key, w_strength, \
+        e, w, allocation, w_gate, r_models = tf.split(
+            interface_vector, [W*R, R, W, 1, W, W, R, 1, 1, R*3], 1)
 
     return output_vector, interface_vector
