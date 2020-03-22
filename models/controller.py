@@ -5,6 +5,7 @@ from tensorflow.keras.layers import (
     BatchNormalization, MaxPool2D, Flatten, Dot
 )
 from tensorflow.keras import Model
+from models.temporal_link import temporal_link
 
 #Defining network Below:
 class Network(Model):
@@ -24,7 +25,7 @@ class Network(Model):
     self.weights_read = Dense(n)
     self.weights_xi = Dense(g)
 
-  def call(self, input, read_vectors, training=False):
+  def call(self, input, read_vectors, temporal_links, precedence, training=False):
     # Call layers of network on input x
     # Use the training variable to handle adding layers such as Dropout
     # and Batch Norm only during training
@@ -44,4 +45,9 @@ class Network(Model):
         e, w, r_gates, allocation, w_gate, r_models = tf.split(
             interface_vector, [W*R, R, W, 1, W, W, R, 1, 1, R*3], 1)
     r_gates = [tf.split(r_gates, [r for r in range(R)])]
+
+    #Accesing memory
+    temporal_links, precedence = temporal_link(temporal_links,
+        precedence, write_weightings)
+
     return output_vector, interface_vector
