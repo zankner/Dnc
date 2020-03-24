@@ -4,9 +4,9 @@ import numpy as np
 def memory_retention_vector(forget_gate_list, read_weighting_prev):
     output_list = []
     for read_headn in forget_gate_list:
-        read_weighting_slices = tf.gather(read_weighting_prev, [read_headn])
+        read_weighting_slices = tf.gather(read_weighting_prev, read_headn)
         #output_element = 1 - (forget_gate * read_weighting_prev[:][read_headn])
-        output_element = tf.ones(tf.shape(read_weighting_slices).numpy()) - (forget_gate * read_weighting_slices)
+        output_element = tf.ones(tf.shape(read_weighting_slices)) - (forget_gate * read_weighting_slices)
         output_list.append(output_element)
 
     #output_vector = np.array(output_list)
