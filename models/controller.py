@@ -22,6 +22,9 @@ class Network(Model):
     self.weights_output = Dense(n)
     self.weights_read = Dense(n)
     self.weights_xi = Dense(g)
+    self.prev_usage_vector = 0
+    self.read_weighting_prev = 0
+    self.prev_write_vector = 0
 
 
   def call(self, input, read_vectors, training=False):
@@ -42,8 +45,19 @@ class Network(Model):
             interface_vector, [W*R, R, W, 1, W, W, R, 1, 1, R*3], 1)
     r_gates = [tf.split(r_gates, [r for r in range(R)])]
 
+    #fetching values from interface_vector
+    free_gates = ... more to fill
+
     #Accesing memory
+    write_vector, usage_vector = dynamic_memory(free_gates, self.read_weighting_prev, self.prev_usage_vector, self.prev_write_vector,
+                                        allocation_gate, write_gate, content_vector,
+                                        memory_matrix, key, key_strength) #note I am falling alseep but please encode a mechanism
+                                        #for storing the previous usage vector and write vector.
     temporal_links, precedence = temporal_link(temporal_links,
         precedence, write_weightings)
+
+    self.prev_usage_vector = usage_vector
+    self.read_weighting_prev = read_weighting
+    self.prev_write_vector = write_vector
 
     return output_vector, interface_vector
