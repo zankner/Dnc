@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-def temporal_weights(temporal_links, write_weights):
-  forward_weights = tf.matmul(write_weights, 
+def temporal_weights(temporal_links, read_weights):
+  forward_weights = tf.matmul(read_weights,
       temporal_links, transpose_b = True)
-  backward_weights = tf.matmul(write_weights, temporal_links)
+  backward_weights = tf.matmul(read_weights, temporal_links)
   return forward_weights, backward_weights
