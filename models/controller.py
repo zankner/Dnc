@@ -7,6 +7,7 @@ from tensorflow.keras import Model
 from models.temporal_link import temporal_link
 from models.read_heads import get_read_vectors
 from models.write_heads import write
+from models.read_weightings import read_weightings
 
 
 class Network(Model):
@@ -51,7 +52,8 @@ class Network(Model):
     #Temporal Links and Generating the Read weighting
     temporal_links, precedence = temporal_link(temporal_links, precedence, write_weightings)
     forward_weight, backward_weight = temporal_weights(temporal_links, read_weighting_prev)
-    read_vector = 
+    read_weighting = read_weighting(read_modes, backward_weighting, 
+        content_weighting, forward_weighting)
 
     # Write to Memory
     self.memory_matrix = write(memory_matrix, write_weighting, erase_vector, write_vector)
