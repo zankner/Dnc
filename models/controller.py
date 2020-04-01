@@ -5,62 +5,60 @@ from tensorflow.keras.layers import (
 )
 from tensorflow.keras import Model
 from models.temporal_link import temporal_link
-from models.read_heads import get_read_vectors
-from models.write_heads import write
+from models.read_vectors import read_vectors
+from models.write import write
 from models.read_weightings import read_weightings
 
 
 class Network(Model):
-  def __init__(self, memory_locations, memory_slot_size, batch_size, input_dim, output_dim, interface_dim, read_heads):
+  def __init__(self, N, M, net_dim, output_dim, R):
     self.flatten = Flatten()
-    self.d1 = Dense(input_dim, activation='relu')
+    self.d1 = Dense(net_dim, activation='relu')
     self.weights_output = Dense(output_dim) #previously n
     self.weights_read = Dense(output_dim)
-    self.weights_xi = Dense(memory_slot_size * read_heads + 3 * memory_slot_size + 5 * read_heads + 3) #previously g
-    self.prev_usage_vector = tf.convert_to_tensor(np.random.random((memory_locations, 1)))
-    self.read_weighting_prev = tf.convert_to_tensor(np.random.random((memory_locations, 1)))
-    self.prev_write_weighting = tf.convert_to_tensor(np.random.random((memory_locations, 1)))
-    self.memory_matrix = tf.convert_to_tensor(np.random.random((memory_locations, memory_slot_size)))
-    self.prev_precedence = tf.comvert_to_tensor()
+    self.weights_xi = Dense((N * R) + (3 * N) + (5 * read_heads) + 3) 
 
-  def call(self, input, read_weighting, training=False):
+  def call(self, x, usage, r_weighting, w_weighting, w_weighting,
+      w, precedence, memory_matrix, temporal_links,training=False):
 
-    #Here fetch the read read_vectors through read_weighting
-    read_vectors = get_read_vectors(self.memory_matrix, read_weighting)
     #feed forward
-    read_vectors = self.flatten(read_vectors)
-    input_vector = tf.concat(input, read_vectors)
-    network_output = self.d1(input_vector)
-
-    #controller output vector
-    v = self.weights_output(network_output)
-    output_vector = tf.math.add(v, self.weights_read(read_vectors))
+    r = self.flatten(r)
+    x = tf.concat(x, r)
+    network_output = self.d1(x)
 
     #interface vector
-    interface_vector = self.weights_xi(h)
-    read_keys, read_strengths, write_key, write_strength, \
-        erase_vector, write_vector, free_gates, allocation_gate, write_gate, read_modes = tf.split(
-            interface_vector, [memory_slot_size*read_heads, read_heads, memory_slot_size, 1, memory_slot_size, memory_slot_size, read_heads, 1, 1, read_heads*3], 1)
-    r_gates = [tf.split(r_gates, [r for r in range(read_heads)])]
-
+    interface_vector = self.weights_xi(network_output)
+    r_keys, r_strengths, w_key, w_strengths, e, w, f_gates, a_gate, \
+        w_gate, r_modes = tf.split(interface_vector, 
+            [N*R, R, N, 1, N, N, R, 1, 1, 3*R, 1)
+    r_gates = [tf.split(r_gates, [r for r in range(R)])]
+    r_strengths = one_plus(r_strengths)
+    w_strengths = one_plus(w_strengths)
+    e = tf.math.log_sigmoid(e)
+    f_gates = tf.math.log_sigmoid(f_gates)
+    a_gate = tf.math.log_sigmoid(a_gate)
+    w_gate = tf.math.log_sigmoid(w_gate)
+    r_modes = tf.nn.softmax(r_modes)
 
     #Dynamic memory------ Generating the write_weighting
-
-    write_weighting, usage_vector = dynamic_memory(free_gates, self.read_weighting_prev, self.prev_usage_vector, self.prev_write_weighting,
-                                                        allocation_gate, write_gate, self.memory_matrix, write_key, write_strength)
+    w_weighting, usage = dynamic_memory(f_gates, r_weighting, usage, 
+      w_weighting, a_gate, w_gate, memory_matrix, w_key, w_strength)
 
     #Temporal Links and Generating the Read weighting
-    temporal_links, precedence = temporal_link(temporal_links, precedence, write_weightings)
-    forward_weight, backward_weight = temporal_weights(temporal_links, read_weighting_prev)
-    read_weighting = read_weighting(read_modes, backward_weighting, 
+    temporal_links, precedence = temporal_link(temporal_links, precedence,
+      w_weightings)
+    forward_weight, backward_weight = temporal_weights(temporal_links, 
+      r_weighting)
+    r_weighting = read_weighting(r_modes, backward_weighting, 
         content_weighting, forward_weighting)
 
     # Write to Memory
-    self.memory_matrix = write(memory_matrix, write_weighting, erase_vector, write_vector)
-    #update stored variables
-    self.prev_usage_vector = usage_vector
-    self.read_weighting_prev = read_weighting
-    self.prev_write_vector = write_vector
-    self.prev_precendence = precedence
+    memory_matrix = write(memory_matrix, w_weighting, e, w)
 
-    return output_vector, interface_vector
+    #controller output vector
+    v = self.weights_output(network_output)
+    r = read_vector(memory_matrix, r_weighting)
+    output_vector = tf.math.add(v, self.weights_read(r))
+
+    return output_vector, interface_vector, usage, r_weighting, \
+        w_weighting, w, precedence, memory_matrix, temporal_links
